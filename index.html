@@ -1,0 +1,1804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitor Dimmer — Premium Ambient Display for Multi-Monitor Setups</title>
+<meta name="description" content="Automatically dims your secondary monitors with beautiful visual effects when you go fullscreen. 10 powerful features. Zero configuration. Free & portable.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #080e1a;
+  --bg-primary: #0e1f36;
+  --bg-card: #132842;
+  --bg-sidebar: #0c1a2e;
+  --bg-titlebar: #0a1628;
+  --bg-input: #0a1526;
+  --accent: #4db8ff;
+  --accent-hover: #2ea6ff;
+  --accent-glow: #7accff;
+  --text-primary: #eaf4ff;
+  --text-secondary: #8bb8dc;
+  --text-subtle: #4a7a9e;
+  --border: #1e3d5e;
+  --success: #4de8b0;
+  --ice-highlight: #b8e4ff;
+  --slider: #d0eaff;
+  --frost: #7accff;
+  --arctic: #00a8e8;
+  --glacier: #48d1cc;
+  --snow: #a8d8ea;
+  --pearl: #b0c4de;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) var(--bg-deep);
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════
+   CANVAS BACKGROUND
+   ═══════════════════════════════════════════ */
+#bg-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════
+   NAVIGATION
+   ═══════════════════════════════════════════ */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(8, 14, 26, 0.7);
+  border-bottom: 1px solid rgba(77, 184, 255, 0.08);
+  transition: all 0.4s ease;
+}
+
+nav.scrolled {
+  background: rgba(8, 14, 26, 0.92);
+  border-bottom-color: rgba(77, 184, 255, 0.15);
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+}
+
+.nav-logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent), var(--frost));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  box-shadow: 0 0 20px rgba(77, 184, 255, 0.3);
+}
+
+.nav-logo-text {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  list-style: none;
+}
+
+.nav-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 400;
+  font-size: 0.9rem;
+  transition: color 0.3s;
+  letter-spacing: 0.02em;
+}
+
+.nav-links a:hover { color: var(--accent); }
+
+.nav-download-btn {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: var(--bg-deep) !important;
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  transition: all 0.3s !important;
+  box-shadow: 0 0 20px rgba(77, 184, 255, 0.25);
+}
+
+.nav-download-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 30px rgba(77, 184, 255, 0.4);
+}
+
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px;
+}
+
+.nav-hamburger span {
+  width: 24px;
+  height: 2px;
+  background: var(--text-secondary);
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+
+/* ═══════════════════════════════════════════
+   HERO SECTION
+   ═══════════════════════════════════════════ */
+.hero {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 8rem 2rem 4rem;
+}
+
+.hero-glow {
+  position: absolute;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(77, 184, 255, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-badge-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  border: 1px solid rgba(77, 184, 255, 0.2);
+  background: rgba(77, 184, 255, 0.06);
+  color: var(--accent-glow);
+}
+
+.hero-badge.version {
+  border-color: rgba(77, 232, 176, 0.3);
+  background: rgba(77, 232, 176, 0.06);
+  color: var(--success);
+}
+
+.hero h1 {
+  font-size: clamp(3rem, 7vw, 5.5rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 50%, var(--frost) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  color: var(--text-secondary);
+  max-width: 640px;
+  line-height: 1.7;
+  margin-bottom: 2.5rem;
+  font-weight: 300;
+}
+
+.hero-cta-group {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 3rem;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1rem 2.5rem;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: var(--bg-deep);
+  border: none;
+  border-radius: 14px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 40px rgba(77, 184, 255, 0.3), 0 8px 32px rgba(0, 0, 0, 0.3);
+  letter-spacing: -0.01em;
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 0 60px rgba(77, 184, 255, 0.45), 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.btn-primary:active { transform: translateY(-1px) scale(0.99); }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  background: rgba(77, 184, 255, 0.08);
+  color: var(--accent);
+  border: 1px solid rgba(77, 184, 255, 0.2);
+  border-radius: 14px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.btn-secondary:hover {
+  background: rgba(77, 184, 255, 0.14);
+  border-color: rgba(77, 184, 255, 0.35);
+  transform: translateY(-2px);
+}
+
+.hero-meta {
+  display: flex;
+  gap: 2rem;
+  color: var(--text-subtle);
+  font-size: 0.85rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.hero-meta span {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* ═══════════════════════════════════════════
+   APP MOCKUP
+   ═══════════════════════════════════════════ */
+.hero-mockup {
+  margin-top: 3rem;
+  width: 100%;
+  max-width: 880px;
+  position: relative;
+}
+
+.mockup-window {
+  background: var(--bg-primary);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5), 0 0 80px rgba(77, 184, 255, 0.08);
+}
+
+.mockup-titlebar {
+  background: var(--bg-titlebar);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.mockup-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+}
+
+.mockup-dot.red { background: #ff5f57; }
+.mockup-dot.yellow { background: #ffbd2e; }
+.mockup-dot.green { background: #28ca41; }
+
+.mockup-titlebar-text {
+  flex: 1;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-subtle);
+  letter-spacing: 0.05em;
+}
+
+.mockup-body {
+  display: flex;
+  min-height: 420px;
+}
+
+.mockup-sidebar {
+  width: 200px;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  padding: 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.mockup-nav-item {
+  padding: 0.65rem 1.25rem;
+  font-size: 0.82rem;
+  color: var(--text-subtle);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  transition: all 0.2s;
+  cursor: default;
+}
+
+.mockup-nav-item.active {
+  color: var(--accent);
+  background: rgba(77, 184, 255, 0.08);
+  border-right: 2px solid var(--accent);
+}
+
+.mockup-content {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mockup-header-banner {
+  background: linear-gradient(135deg, rgba(77, 184, 255, 0.12) 0%, rgba(122, 204, 255, 0.06) 100%);
+  border-radius: 12px;
+  padding: 1.25rem;
+  border: 1px solid rgba(77, 184, 255, 0.1);
+}
+
+.mockup-header-banner h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: var(--text-primary);
+}
+
+.mockup-header-banner p {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.mockup-status-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.mockup-status-card {
+  flex: 1;
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid var(--border);
+}
+
+.mockup-status-label {
+  font-size: 0.7rem;
+  color: var(--text-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.35rem;
+}
+
+.mockup-status-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.mockup-status-value.green { color: var(--success); }
+
+.mockup-monitors {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.mockup-monitor-card {
+  flex: 1;
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid var(--border);
+}
+
+.mockup-monitor-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.mockup-monitor-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.mockup-monitor-status {
+  font-size: 0.65rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 100px;
+  background: rgba(77, 232, 176, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(77, 232, 176, 0.2);
+}
+
+.mockup-slider-row {
+  margin-bottom: 0.5rem;
+}
+
+.mockup-slider-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--text-subtle);
+  margin-bottom: 0.3rem;
+}
+
+.mockup-slider-track {
+  height: 6px;
+  background: var(--bg-input);
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+}
+
+.mockup-slider-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--frost));
+  border-radius: 3px;
+}
+
+.mockup-mode-tag {
+  display: inline-block;
+  font-size: 0.65rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(77, 184, 255, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(77, 184, 255, 0.15);
+  margin-top: 0.35rem;
+}
+
+/* ═══════════════════════════════════════════
+   SECTION COMMONS
+   ═══════════════════════════════════════════ */
+section {
+  position: relative;
+  z-index: 1;
+  padding: 6rem 2rem;
+}
+
+.section-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 100px;
+  background: rgba(77, 184, 255, 0.06);
+  border: 1px solid rgba(77, 184, 255, 0.12);
+}
+
+.section-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+}
+
+.section-desc {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  line-height: 1.7;
+  font-weight: 300;
+  margin-bottom: 3rem;
+}
+
+/* ═══════════════════════════════════════════
+   FEATURES SECTION
+   ═══════════════════════════════════════════ */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+
+.feature-card {
+  background: rgba(19, 40, 66, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(30, 61, 94, 0.5);
+  border-radius: 16px;
+  padding: 1.75rem;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: default;
+}
+
+.feature-card:hover {
+  border-color: rgba(77, 184, 255, 0.3);
+  background: rgba(19, 40, 66, 0.7);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 40px rgba(77, 184, 255, 0.06);
+}
+
+.feature-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  margin-bottom: 1.25rem;
+  background: rgba(77, 184, 255, 0.08);
+  border: 1px solid rgba(77, 184, 255, 0.12);
+}
+
+.feature-card h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.feature-card p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  font-weight: 300;
+}
+
+/* ═══════════════════════════════════════════
+   VISUAL MODES SECTION
+   ═══════════════════════════════════════════ */
+.modes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.mode-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: default;
+}
+
+.mode-card:hover {
+  border-color: rgba(77, 184, 255, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+}
+
+.mode-preview {
+  height: 120px;
+  position: relative;
+  overflow: hidden;
+}
+
+.mode-preview-particles {
+  background: linear-gradient(135deg, #0e1f36 0%, #132842 100%);
+}
+.mode-preview-particles::before,
+.mode-preview-particles::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+  animation: float-particle 4s ease-in-out infinite;
+}
+.mode-preview-particles::before {
+  width: 60px; height: 60px;
+  top: 20%; left: 30%;
+  opacity: 0.4;
+}
+.mode-preview-particles::after {
+  width: 40px; height: 40px;
+  top: 50%; left: 65%;
+  opacity: 0.3;
+  animation-delay: -2s;
+  animation-duration: 5s;
+}
+
+.mode-preview-gradient {
+  background: linear-gradient(135deg, #0e1f36, #1a3a5c, #4db8ff22, #0e1f36);
+  background-size: 300% 300%;
+  animation: gradient-shift 6s ease infinite;
+}
+
+.mode-preview-stars {
+  background: #080e1a;
+}
+.mode-preview-stars::before {
+  content: '✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  font-size: 1.2rem;
+  letter-spacing: 1rem;
+  opacity: 0.5;
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+.mode-preview-pulse {
+  background: radial-gradient(circle at center, rgba(77, 184, 255, 0.2), #0e1f36 70%);
+  animation: pulse-effect 2.5s ease-in-out infinite;
+}
+
+.mode-preview-aurora {
+  background: linear-gradient(180deg, #0e1f36, rgba(77, 232, 176, 0.15), rgba(77, 184, 255, 0.1), #0e1f36);
+  background-size: 100% 300%;
+  animation: aurora-shift 5s ease infinite;
+}
+
+.mode-preview-wave {
+  background: #0e1f36;
+  overflow: hidden;
+}
+.mode-preview-wave::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: -50%;
+  width: 200%; height: 60px;
+  background: rgba(77, 184, 255, 0.1);
+  border-radius: 50%;
+  animation: wave-move 3s ease-in-out infinite;
+}
+
+.mode-preview-rain {
+  background: #080e1a;
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent,
+    transparent 20px,
+    rgba(77, 184, 255, 0.08) 20px,
+    rgba(77, 184, 255, 0.08) 22px
+  );
+  animation: rain-fall 1s linear infinite;
+}
+
+.mode-preview-static {
+  background: linear-gradient(180deg, #0e1f36, #0a1526);
+}
+
+.mode-preview-image {
+  background: linear-gradient(135deg, #132842, #1e3d5e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-subtle);
+  font-size: 2rem;
+}
+
+.mode-preview-custom {
+  background: linear-gradient(135deg, #0e1f36, #1a2d4a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mode-preview-custom::before {
+  content: '</>';
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.5rem;
+  opacity: 0.5;
+}
+
+.mode-info {
+  padding: 1rem 1.25rem;
+}
+
+.mode-info h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  color: var(--text-primary);
+}
+
+.mode-info p {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  font-weight: 300;
+}
+
+/* ═══════════════════════════════════════════
+   HOW IT WORKS
+   ═══════════════════════════════════════════ */
+.steps-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  position: relative;
+}
+
+.steps-row::before {
+  content: '';
+  position: absolute;
+  top: 40px;
+  left: 15%;
+  right: 15%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--border), var(--accent), var(--border), transparent);
+  z-index: 0;
+}
+
+.step-card {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.step-number {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--accent);
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  box-shadow: 0 0 30px rgba(77, 184, 255, 0.1);
+  transition: all 0.3s;
+}
+
+.step-card:hover .step-number {
+  border-color: var(--accent);
+  box-shadow: 0 0 40px rgba(77, 184, 255, 0.25);
+  transform: scale(1.05);
+}
+
+.step-card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.step-card p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+/* ═══════════════════════════════════════════
+   HOTKEYS SECTION
+   ═══════════════════════════════════════════ */
+.hotkeys-table {
+  width: 100%;
+  max-width: 700px;
+  border-collapse: separate;
+  border-spacing: 0 0.5rem;
+}
+
+.hotkeys-table tr {
+  transition: transform 0.2s;
+}
+
+.hotkeys-table tr:hover {
+  transform: translateX(4px);
+}
+
+.hotkeys-table td {
+  padding: 1rem 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.hotkeys-table td:first-child {
+  border-radius: 12px 0 0 12px;
+  border-right: none;
+  width: 240px;
+}
+
+.hotkeys-table td:last-child {
+  border-radius: 0 12px 12px 0;
+  border-left: none;
+  color: var(--text-secondary);
+  font-weight: 300;
+}
+
+.kbd {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--accent);
+  margin-right: 0.25rem;
+  box-shadow: 0 2px 0 var(--border);
+}
+
+/* ═══════════════════════════════════════════
+   SYSTEM REQUIREMENTS
+   ═══════════════════════════════════════════ */
+.specs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 0.75rem;
+}
+
+.spec-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: all 0.3s;
+}
+
+.spec-item:hover {
+  border-color: rgba(77, 184, 255, 0.2);
+}
+
+.spec-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: rgba(77, 184, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.spec-text strong {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.15rem;
+}
+
+.spec-text span {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 300;
+}
+
+/* ═══════════════════════════════════════════
+   DOWNLOAD CTA SECTION
+   ═══════════════════════════════════════════ */
+.download-section {
+  text-align: center;
+  padding: 6rem 2rem 4rem;
+}
+
+.download-box {
+  max-width: 700px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, rgba(19, 40, 66, 0.6), rgba(14, 31, 54, 0.8));
+  border: 1px solid rgba(77, 184, 255, 0.15);
+  border-radius: 24px;
+  padding: 3.5rem 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.download-box::before {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(77, 184, 255, 0.08), transparent 70%);
+  pointer-events: none;
+}
+
+.download-box h2 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.03em;
+}
+
+.download-box p {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+  font-weight: 300;
+  font-size: 1.05rem;
+}
+
+.download-file-info {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  color: var(--text-subtle);
+  font-size: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.download-file-info span {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* ═══════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════ */
+footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--border);
+  padding: 3rem 2rem;
+}
+
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.footer-logo-icon {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--accent), var(--frost));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+}
+
+.footer-text {
+  font-size: 0.82rem;
+  color: var(--text-subtle);
+}
+
+.footer-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.footer-links a {
+  color: var(--text-subtle);
+  text-decoration: none;
+  font-size: 0.82rem;
+  transition: color 0.3s;
+}
+
+.footer-links a:hover { color: var(--accent); }
+
+.footer-love {
+  font-size: 0.82rem;
+  color: var(--text-subtle);
+}
+
+.footer-love span { color: var(--accent); }
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════ */
+@keyframes float-particle {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(15px, -20px) scale(1.2); }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes pulse-effect {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
+
+@keyframes aurora-shift {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 0% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
+@keyframes wave-move {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+@keyframes rain-fall {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 22px; }
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .mockup-sidebar { display: none; }
+  .steps-row { grid-template-columns: 1fr; gap: 2.5rem; }
+  .steps-row::before { display: none; }
+  .features-grid { grid-template-columns: 1fr; }
+  .modes-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+}
+
+@media (max-width: 768px) {
+  nav { padding: 0.75rem 1.25rem; }
+  
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0; right: 0;
+    flex-direction: column;
+    background: rgba(8, 14, 26, 0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 1.5rem;
+    gap: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-links.open { display: flex; }
+
+  .nav-hamburger { display: flex; }
+
+  .hero { padding: 6rem 1.25rem 3rem; }
+
+  .hero h1 { font-size: 2.5rem; }
+
+  .mockup-body { min-height: 300px; }
+  .mockup-monitors { flex-direction: column; }
+  .mockup-status-row { flex-direction: column; }
+
+  .specs-grid { grid-template-columns: 1fr; }
+
+  .hero-meta { gap: 1rem; }
+
+  .download-box { padding: 2.5rem 1.5rem; }
+  .download-box h2 { font-size: 1.7rem; }
+
+  section { padding: 4rem 1.25rem; }
+
+  .footer-inner {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero h1 { font-size: 2rem; }
+  .hero-badge-row { gap: 0.35rem; }
+  .hero-badge { font-size: 0.65rem; padding: 0.25rem 0.6rem; }
+  .btn-primary { width: 100%; justify-content: center; }
+  .btn-secondary { width: 100%; justify-content: center; }
+  .hero-cta-group { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- Background Particles Canvas -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- Navigation -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">🌙</div>
+    <span class="nav-logo-text">Monitor Dimmer</span>
+  </a>
+  <ul class="nav-links" id="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#modes">Visual Modes</a></li>
+    <li><a href="#how-it-works">How It Works</a></li>
+    <li><a href="#hotkeys">Hotkeys</a></li>
+    <li><a href="#requirements">Requirements</a></li>
+    <li><a href="#download" class="nav-download-btn">Download Free</a></li>
+  </ul>
+  <button class="nav-hamburger" id="nav-hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     HERO SECTION
+     ═══════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  
+  <div class="hero-badge-row">
+    <span class="hero-badge version">✦ v3.0.0 — Premium Edition</span>
+    <span class="hero-badge">🪟 Windows 10/11</span>
+    <span class="hero-badge">📦 Portable — No Install</span>
+    <span class="hero-badge">🆓 Free</span>
+  </div>
+
+  <h1>Your monitors,<br>beautifully dimmed.</h1>
+
+  <p class="hero-subtitle">
+    Premium ambient overlay effects for multi-monitor setups. Automatic fullscreen detection. 
+    10 powerful features. One portable app.
+  </p>
+
+  <div class="hero-cta-group">
+    <a href="#download" class="btn-primary">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download Free
+    </a>
+    <a href="#features" class="btn-secondary">
+      Explore Features
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </a>
+  </div>
+
+  <div class="hero-meta">
+    <span>📁 MonitorDimmer.exe</span>
+    <span>💾 43 MB</span>
+    <span>⚡ Zero configuration</span>
+    <span>🎮 Built for gamers</span>
+  </div>
+
+  <!-- App Mockup -->
+  <div class="hero-mockup reveal">
+    <div class="mockup-window">
+      <div class="mockup-titlebar">
+        <div class="mockup-dot red"></div>
+        <div class="mockup-dot yellow"></div>
+        <div class="mockup-dot green"></div>
+        <span class="mockup-titlebar-text">Monitor Dimmer v3.0.0 — Premium Edition</span>
+      </div>
+      <div class="mockup-body">
+        <div class="mockup-sidebar">
+          <div class="mockup-nav-item active">📊 Dashboard</div>
+          <div class="mockup-nav-item">✨ Effects</div>
+          <div class="mockup-nav-item">📅 Schedule</div>
+          <div class="mockup-nav-item">⚙️ Settings</div>
+          <div class="mockup-nav-item">ℹ️ About</div>
+        </div>
+        <div class="mockup-content">
+          <div class="mockup-header-banner">
+            <h3>✦ Dashboard — Monitor Control Center</h3>
+            <p>All monitors detected and ready. Overlay effects are active.</p>
+          </div>
+          <div class="mockup-status-row">
+            <div class="mockup-status-card">
+              <div class="mockup-status-label">Status</div>
+              <div class="mockup-status-value green">● Active</div>
+            </div>
+            <div class="mockup-status-card">
+              <div class="mockup-status-label">Profile</div>
+              <div class="mockup-status-value">Gaming Night</div>
+            </div>
+            <div class="mockup-status-card">
+              <div class="mockup-status-label">Monitors</div>
+              <div class="mockup-status-value">3</div>
+            </div>
+          </div>
+          <div class="mockup-monitors">
+            <div class="mockup-monitor-card">
+              <div class="mockup-monitor-top">
+                <span class="mockup-monitor-name">🖥 Monitor 2</span>
+                <span class="mockup-monitor-status">● Active</span>
+              </div>
+              <div class="mockup-slider-row">
+                <div class="mockup-slider-label"><span>Opacity</span><span>80%</span></div>
+                <div class="mockup-slider-track"><div class="mockup-slider-fill" style="width:80%"></div></div>
+              </div>
+              <span class="mockup-mode-tag">✨ Particles</span>
+            </div>
+            <div class="mockup-monitor-card">
+              <div class="mockup-monitor-top">
+                <span class="mockup-monitor-name">🖥 Monitor 3</span>
+                <span class="mockup-monitor-status">● Active</span>
+              </div>
+              <div class="mockup-slider-row">
+                <div class="mockup-slider-label"><span>Opacity</span><span>65%</span></div>
+                <div class="mockup-slider-track"><div class="mockup-slider-fill" style="width:65%"></div></div>
+              </div>
+              <span class="mockup-mode-tag">🌌 Aurora</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     FEATURES SECTION
+     ═══════════════════════════════════════════ -->
+<section id="features">
+  <div class="section-inner">
+    <div class="reveal">
+      <span class="section-label">⚡ Features</span>
+      <h2 class="section-title">10 Powerful Features</h2>
+      <p class="section-desc">Everything you need to control your multi-monitor experience. Built for gamers, streamers, and power users.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <div class="feature-icon">🖥</div>
+        <h3>Per-Monitor Control</h3>
+        <p>Control each monitor independently — different mode and opacity on every screen. Perfect for multi-monitor setups where you want unique effects per display.</p>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon">📋</div>
+        <h3>Profile System</h3>
+        <p>Save all your current settings as named profiles. Switch instantly between "Gaming Night", "Movie Mode", or any custom setup from the tray or interface.</p>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon">⌨️</div>
+        <h3>Global Hotkeys</h3>
+        <p>Control everything without leaving your game. Toggle on/off, adjust opacity, switch profiles — all with fully remappable keyboard shortcuts.</p>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon">💾</div>
+        <h3>Export / Import Settings</h3>
+        <p>Complete backup of all settings — profiles, hotkeys, schedules — in a single JSON file. Restore on any PC. Perfect for migration or sharing setups.</p>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon">🌊</div>
+        <h3>Transition Animations</h3>
+        <p>Smooth fade-in and fade-out transitions. Configurable from 0ms (instant) to 2000ms (cinematic slow fade). No jarring screen changes.</p>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon">📅</div>
+        <h3>Scheduling & Auto-Activation</h3>
+        <p>Time-based rules: "Between 10PM–6AM, activate Night Mode." App-based rules: "When game.exe launches, activate Gaming profile." Full automation.</p>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon">🎨</div>
+        <h3>Custom Shader Import</h3>
+        <p>Import GLSL fragment shader files (.frag) to create completely unique visual effects. For advanced users who want to push the boundaries.</p>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon">🎵</div>
+        <h3>Audio Reactive Mode</h3>
+        <p>Overlay pulses and reacts to your music and game sounds in real-time via Windows Core Audio (WASAPI). Bass, mid, and treble each affect the overlay differently.</p>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon">📊</div>
+        <h3>System Stats Widget</h3>
+        <p>Display CPU usage, RAM usage, and GPU temperature directly on the overlay. Positionable in any corner. Always visible, always updated.</p>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon">🔄</div>
+        <h3>Auto-Update System</h3>
+        <p>Automatically checks for new versions at startup. Shows a notification with changelog and one-click update button. Always stay current.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     VISUAL MODES SECTION
+     ═══════════════════════════════════════════ -->
+<section id="modes">
+  <div class="section-inner">
+    <div class="reveal">
+      <span class="section-label">✨ Visual Modes</span>
+      <h2 class="section-title">9 Built-in Visual Modes</h2>
+      <p class="section-desc">From subtle ambience to mesmerizing effects. Each mode is GPU-accelerated with OpenGL shaders at 120 FPS.</p>
+    </div>
+
+    <div class="modes-grid">
+      <div class="mode-card reveal">
+        <div class="mode-preview mode-preview-particles"></div>
+        <div class="mode-info">
+          <h4>✦ Particles</h4>
+          <p>Floating particles with a soft glow effect. Subtle ambient motion.</p>
+        </div>
+      </div>
+
+      <div class="mode-card reveal">
+        <div class="mode-preview mode-preview-gradient"></div>
+        <div class="mode-info">
+          <h4>🎨 Gradient</h4>
+          <p>Slowly shifting color gradient. Organic and calming.</p>
+        </div>
+      </div>
+
+      <div class="mode-card reveal">
+        <div class="mode-preview mode-preview-stars"></div>
+        <div class="mode-info">
+          <h4>⭐ Stars</h4>
+          <p>Twinkling star field simulating the night sky.</p>
+        </div>
+      </div>
+
+      <div class="mode-card reveal">
+        <div class="mode-preview mode-preview-pulse"></div>
+        <div class="mode-info">
+          <h4>💠 Pulse</h4>
+          <p>Rhythmic breathing effect — glows and dims in a relaxing cycle.</p>
+        </div>
+      </div>
+
+      <div class="mode-card reveal">
+        <div class="mode-preview mode-preview-aurora"></div>
+        <div class="mode-info">
+          <h4>🌌 Aurora</h4>
+          <p>Northern lights — colorful waves flowing across the screen.</p>
+        </div>
+      </div>
+
+      <div class="mode-card reveal">
+        <div class="mode-preview mode-preview-wave"></div>
+        <div class="mode-info">
+          <h4>🌊 Wave</h4>
+          <p>Sinusoidal wave propagating smoothly across the display.</p>
+        </div>
+      </div>
+
+      <div class="mode-card reveal">
+        <div class="mode-preview mode-preview-rain"></div>
+        <div class="mode-info">
+          <h4>🌧 Rain</h4>
+          <p>Digital rain — matrix-style falling streaks.</p>
+        </div>
+      </div>
+
+      <div class="mode-card reveal">
+        <div class="mode-preview mode-preview-static"></div>
+        <div class="mode-info">
+          <h4>⬛ Static</h4>
+          <p>Solid dark overlay. No animation. Lightest on GPU resources.</p>
+        </div>
+      </div>
+
+      <div class="mode-card reveal">
+        <div class="mode-preview mode-preview-image"></div>
+        <div class="mode-info">
+          <h4>🖼 Image</h4>
+          <p>Use any custom image as your overlay background.</p>
+        </div>
+      </div>
+
+      <div class="mode-card reveal">
+        <div class="mode-preview mode-preview-custom"></div>
+        <div class="mode-info">
+          <h4>🔧 Custom Shaders</h4>
+          <p>Import your own GLSL fragment shaders for unique effects.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     HOW IT WORKS
+     ═══════════════════════════════════════════ -->
+<section id="how-it-works">
+  <div class="section-inner">
+    <div class="reveal" style="text-align:center;">
+      <span class="section-label">🚀 How It Works</span>
+      <h2 class="section-title">Up & Running in Seconds</h2>
+      <p class="section-desc" style="margin-left:auto;margin-right:auto;">No installation. No configuration. No dependencies. Just download, run, and enjoy.</p>
+    </div>
+
+    <div class="steps-row reveal">
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <h3>Download & Run</h3>
+        <p>Download the portable .exe file. Double-click to run. No installation required — works from any folder.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <h3>Go Fullscreen</h3>
+        <p>Launch any game, movie, or app in fullscreen mode. Monitor Dimmer detects it automatically.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <h3>Enjoy the Ambience</h3>
+        <p>Your secondary monitors are beautifully dimmed with stunning visual effects. Focus on what matters.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     HOTKEYS SECTION
+     ═══════════════════════════════════════════ -->
+<section id="hotkeys">
+  <div class="section-inner">
+    <div class="reveal">
+      <span class="section-label">⌨️ Keyboard Shortcuts</span>
+      <h2 class="section-title">Control Without Leaving Your Game</h2>
+      <p class="section-desc">All shortcuts are fully remappable from Settings.</p>
+    </div>
+
+    <table class="hotkeys-table reveal">
+      <tr>
+        <td><span class="kbd">Ctrl</span> <span class="kbd">Alt</span> <span class="kbd">D</span></td>
+        <td>Toggle dimmer on / off</td>
+      </tr>
+      <tr>
+        <td><span class="kbd">Ctrl</span> <span class="kbd">Alt</span> <span class="kbd">↑</span></td>
+        <td>Increase opacity by 10%</td>
+      </tr>
+      <tr>
+        <td><span class="kbd">Ctrl</span> <span class="kbd">Alt</span> <span class="kbd">↓</span></td>
+        <td>Decrease opacity by 10%</td>
+      </tr>
+      <tr>
+        <td><span class="kbd">Ctrl</span> <span class="kbd">Alt</span> <span class="kbd">→</span></td>
+        <td>Next profile</td>
+      </tr>
+      <tr>
+        <td><span class="kbd">Ctrl</span> <span class="kbd">Alt</span> <span class="kbd">←</span></td>
+        <td>Previous profile</td>
+      </tr>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SYSTEM REQUIREMENTS
+     ═══════════════════════════════════════════ -->
+<section id="requirements">
+  <div class="section-inner">
+    <div class="reveal">
+      <span class="section-label">💻 System Requirements</span>
+      <h2 class="section-title">Lightweight & Compatible</h2>
+      <p class="section-desc">Runs on virtually any modern Windows setup. Minimal resources, maximum effect.</p>
+    </div>
+
+    <div class="specs-grid reveal">
+      <div class="spec-item">
+        <div class="spec-icon">🪟</div>
+        <div class="spec-text">
+          <strong>Operating System</strong>
+          <span>Windows 10 / 11 (64-bit)</span>
+        </div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-icon">🖥</div>
+        <div class="spec-text">
+          <strong>Monitors</strong>
+          <span>Minimum 2 displays required</span>
+        </div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-icon">🎮</div>
+        <div class="spec-text">
+          <strong>GPU</strong>
+          <span>Any GPU with OpenGL 3.3+ (GDI fallback available)</span>
+        </div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-icon">🧠</div>
+        <div class="spec-text">
+          <strong>RAM</strong>
+          <span>~100-150 MB during operation</span>
+        </div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-icon">⚡</div>
+        <div class="spec-text">
+          <strong>CPU</strong>
+          <span>Minimal overhead — negligible impact</span>
+        </div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-icon">💾</div>
+        <div class="spec-text">
+          <strong>Disk Space</strong>
+          <span>~43 MB (portable executable)</span>
+        </div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-icon">📦</div>
+        <div class="spec-text">
+          <strong>Dependencies</strong>
+          <span>None — fully self-contained</span>
+        </div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-icon">🔧</div>
+        <div class="spec-text">
+          <strong>Installation</strong>
+          <span>Not required — download, double-click, done</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     DOWNLOAD CTA
+     ═══════════════════════════════════════════ -->
+<section id="download" class="download-section">
+  <div class="download-box reveal">
+    <h2>Ready to dim?</h2>
+    <p>Download Monitor Dimmer and transform your multi-monitor experience in seconds.</p>
+    <a href="#" class="btn-primary" onclick="alert('Download link will be configured here'); return false;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download Now — It's Free
+    </a>
+    <div class="download-file-info">
+      <span>📁 MonitorDimmer.exe</span>
+      <span>💾 43 MB</span>
+      <span>📋 v3.0.0</span>
+      <span>📦 Portable — No install</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <div class="footer-logo-icon">🌙</div>
+      <span class="footer-text">Monitor Dimmer © 2026</span>
+    </div>
+    <div class="footer-links">
+      <a href="#features">Features</a>
+      <a href="#modes">Visual Modes</a>
+      <a href="#download">Download</a>
+    </div>
+    <div class="footer-love">
+      Built with <span>♥</span> for gamers
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════ -->
+<script>
+// ── Particle Background ──
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let mouse = { x: -1000, y: -1000 };
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+document.addEventListener('mousemove', e => {
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
+});
+
+class Particle {
+  constructor() {
+    this.reset();
+  }
+  reset() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.size = Math.random() * 2 + 0.5;
+    this.speedX = (Math.random() - 0.5) * 0.3;
+    this.speedY = (Math.random() - 0.5) * 0.3;
+    this.opacity = Math.random() * 0.4 + 0.05;
+    this.baseOpacity = this.opacity;
+  }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+
+    const dx = mouse.x - this.x;
+    const dy = mouse.y - this.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    
+    if (dist < 150) {
+      this.opacity = this.baseOpacity + (1 - dist / 150) * 0.4;
+      this.size += (3 - this.size) * 0.05;
+    } else {
+      this.opacity += (this.baseOpacity - this.opacity) * 0.02;
+      this.size += ((Math.random() * 2 + 0.5) - this.size) * 0.01;
+    }
+
+    if (this.x < -10 || this.x > canvas.width + 10 || 
+        this.y < -10 || this.y > canvas.height + 10) {
+      this.reset();
+    }
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(77, 184, 255, ${this.opacity})`;
+    ctx.fill();
+  }
+}
+
+for (let i = 0; i < 80; i++) {
+  particles.push(new Particle());
+}
+
+function animateParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Draw connections
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 120) {
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = `rgba(77, 184, 255, ${0.06 * (1 - dist / 120)})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+
+  particles.forEach(p => {
+    p.update();
+    p.draw();
+  });
+
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// ── Nav scroll effect ──
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// ── Mobile hamburger ──
+const hamburger = document.getElementById('nav-hamburger');
+const navLinks = document.getElementById('nav-links');
+hamburger.addEventListener('click', () => {
+  navLinks.classList.toggle('open');
+});
+
+// Close mobile menu on link click
+navLinks.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', () => {
+    navLinks.classList.remove('open');
+  });
+});
+
+// ── Scroll reveal ──
+const revealElements = document.querySelectorAll('.reveal');
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry, index) => {
+    if (entry.isIntersecting) {
+      // Stagger animation for grid children
+      const parent = entry.target.parentElement;
+      if (parent && (parent.classList.contains('features-grid') || 
+                     parent.classList.contains('modes-grid') || 
+                     parent.classList.contains('specs-grid'))) {
+        const siblings = Array.from(parent.querySelectorAll('.reveal'));
+        const idx = siblings.indexOf(entry.target);
+        entry.target.style.transitionDelay = `${idx * 0.08}s`;
+      }
+      entry.target.classList.add('visible');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+revealElements.forEach(el => revealObserver.observe(el));
+
+// ── Smooth scroll for anchor links ──
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+</script>
+
+</body>
+</html>
